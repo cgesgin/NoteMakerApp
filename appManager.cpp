@@ -7,6 +7,7 @@
 #include <QPushButton>
 #include <QMessageBox>
 #include <QMap>
+#include <QLineEdit>
 
 class AppManager
 {
@@ -35,6 +36,7 @@ private:
     QPushButton *deleteButton;
     QPushButton *newButton;
 
+    QLineEdit *titleEditor;
 
     // Note storage
     QMap<QString, QString> notes;
@@ -82,6 +84,10 @@ private:
 
         QVBoxLayout *rightLayout = new QVBoxLayout(rightPanel);
 
+        titleEditor = new QLineEdit();
+        titleEditor->setPlaceholderText("Note title...");
+
+        rightLayout->addWidget(titleEditor);
 
         noteEditor = new QTextEdit();
 
@@ -125,7 +131,19 @@ private:
 
     void saveCurrentNote()
     {
+        QString title = titleEditor->text().trimmed();
         QString content = noteEditor->toPlainText().trimmed();
+
+        if (title.isEmpty())
+        {
+            QMessageBox::warning(
+                mainWindow,
+                "Error",
+                "Please enter a title"
+                );
+
+            return;
+        }
 
         if (content.isEmpty())
         {
@@ -137,9 +155,6 @@ private:
 
             return;
         }
-
-
-        QString title = content.left(30).trimmed();
 
         notes[title] = content;
 

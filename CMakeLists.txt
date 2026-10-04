@@ -26,7 +26,7 @@ qt_add_executable(appNoteMakerApp
 qt_add_qml_module(appNoteMakerApp
     URI NoteMakerApp
     QML_FILES
-        Main.qml
+
         SOURCES appManager.cpp
 )
 
