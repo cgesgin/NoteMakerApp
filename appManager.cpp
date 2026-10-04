@@ -5,6 +5,8 @@
 #include <QListWidget>
 #include <QTextEdit>
 #include <QPushButton>
+#include <QMessageBox>
+#include <QMap>
 
 class AppManager
 {
@@ -34,6 +36,10 @@ private:
     QPushButton *newButton;
 
 
+    // Note storage
+    QMap<QString, QString> notes;
+
+
     void setupUI()
     {
         mainWindow = new QMainWindow();
@@ -45,7 +51,6 @@ private:
         // Central Widget
         centralWidget = new QWidget();
 
-        // LEFT + RIGHT yan yana olacak
         mainLayout = new QHBoxLayout(centralWidget);
 
 
@@ -101,5 +106,54 @@ private:
 
 
         mainWindow->setCentralWidget(centralWidget);
+
+
+        // --------------------
+        // CONNECTIONS
+        // --------------------
+
+        QObject::connect(
+            saveButton,
+            &QPushButton::clicked,
+            [this]()
+            {
+                saveCurrentNote();
+            }
+            );
+    }
+
+
+    void saveCurrentNote()
+    {
+        QString content = noteEditor->toPlainText().trimmed();
+
+        if (content.isEmpty())
+        {
+            QMessageBox::warning(
+                mainWindow,
+                "Error",
+                "No Text to Save"
+                );
+
+            return;
+        }
+
+
+        QString title = content.left(30).trimmed();
+
+        notes[title] = content;
+
+        updateNotes();
+    }
+
+
+    void updateNotes()
+    {
+        noteList->clear();
+
+        for (const QString &title : notes.keys())
+        {
+            noteList->addItem(title);
+        }
     }
 };
