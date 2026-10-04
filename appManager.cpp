@@ -67,14 +67,11 @@ private:
         noteList = new QListWidget();
         leftLayout->addWidget(noteList);
 
-
         newButton = new QPushButton("New Note");
         leftLayout->addWidget(newButton);
 
-
         deleteButton = new QPushButton("Delete");
         leftLayout->addWidget(deleteButton);
-
 
         // --------------------
         // RIGHT PANEL
@@ -126,6 +123,33 @@ private:
                 saveCurrentNote();
             }
             );
+
+        QObject::connect(
+            deleteButton,
+            &QPushButton::clicked,
+            [this]()
+            {
+                onDeleteClicked();
+            }
+            );
+
+        QObject::connect(
+            noteList,
+            &QListWidget::itemClicked,
+            [this](QListWidgetItem *item)
+            {
+                onNoteSelected(item);
+            }
+            );
+
+        QObject::connect(
+            newButton,
+            &QPushButton::clicked,
+            [this]()
+            {
+                clearNotes();
+            }
+            );
     }
 
 
@@ -157,6 +181,8 @@ private:
         }
 
         notes[title] = content;
+        noteEditor->clear();
+        titleEditor->clear();
 
         updateNotes();
     }
@@ -164,11 +190,56 @@ private:
 
     void updateNotes()
     {
+        titleEditor->clear();
         noteList->clear();
 
         for (const QString &title : notes.keys())
         {
             noteList->addItem(title);
         }
+    }
+
+    void onNoteSelected(QListWidgetItem *item){
+
+        QString title = item->text();
+        noteEditor->clear();
+        titleEditor->clear();
+        titleEditor->setText(title);
+        noteEditor->setText(notes.value(title));
+    }
+
+    void onDeleteClicked(){
+
+        QListWidgetItem *item = noteList->currentItem();
+
+        if(!item){
+
+            QMessageBox::warning(mainWindow,"error","No note Selected.");
+            return;
+        }
+
+        QString title = item->text();
+        notes.remove(title);
+
+        delete item;
+        noteEditor->clear();
+        titleEditor->clear();
+    }
+
+    void clearNotes()
+    {
+        QMessageBox::StandardButton reply =
+            QMessageBox::question(
+                mainWindow,
+                "Clear Notes",
+                "Are you sure you want to clear the editor?",
+                QMessageBox::Yes | QMessageBox::No
+                );
+
+        if (reply != QMessageBox::Yes)
+            return;
+
+        titleEditor->clear();
+        noteEditor->clear();
     }
 };
