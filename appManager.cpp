@@ -9,6 +9,8 @@
 #include <QMap>
 #include <QLineEdit>
 
+#include "dataPersistence.cpp"
+
 class AppManager
 {
 public:
@@ -16,6 +18,8 @@ public:
     AppManager()
     {
         setupUI();
+        loadNotes();
+        updateNotes();
     }
 
     void show()
@@ -121,6 +125,7 @@ private:
             [this]()
             {
                 saveCurrentNote();
+                DataPersistence::saveNotes(notes);
             }
             );
 
@@ -130,6 +135,7 @@ private:
             [this]()
             {
                 onDeleteClicked();
+                DataPersistence::saveNotes(notes);
             }
             );
 
@@ -148,6 +154,15 @@ private:
             [this]()
             {
                 clearNotes();
+            }
+            );
+
+        QObject::connect(
+            mainWindow,
+            &QMainWindow::destroyed,
+            [=]()
+            {
+                DataPersistence::saveNotes(notes);
             }
             );
     }
@@ -241,5 +256,9 @@ private:
 
         titleEditor->clear();
         noteEditor->clear();
+    }
+
+    void loadNotes(){
+        notes = DataPersistence::loadNotes();
     }
 };
